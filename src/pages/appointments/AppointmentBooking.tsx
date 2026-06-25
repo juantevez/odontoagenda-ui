@@ -14,6 +14,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useBookAppointment, useAvailability, useProfessionals } from '../../hooks/useAppointments';
 import { usePatientSearch } from '../../hooks/usePatients';
 import { extractErrorMessage } from '../../utils/errors';
+import { specialtyLabel } from '../../utils/constants';
 import type { Professional } from '../../api/professional.api';
 import type { Patient } from '../../types/patient.types';
 
@@ -51,7 +52,7 @@ export default function AppointmentBooking() {
   const procedures = selectedProfessional
     ? (selectedProfessional.licenses ?? [])
         .filter((l) => l.is_valid)
-        .map((l) => ({ code: l.specialty_code, name: l.specialty_name || l.specialty_code }))
+        .map((l) => ({ code: l.specialty_code, name: specialtyLabel(l.specialty_code) }))
     : [];
 
   // Load available slots when all dependencies are selected

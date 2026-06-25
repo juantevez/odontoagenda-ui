@@ -12,6 +12,9 @@ import { useQuery } from '@tanstack/react-query';
 import Table, { type Column } from '../../components/common/Table';
 import { professionalApi, type Professional } from '../../api/professional.api';
 import { usePermissions } from '../../hooks/usePermissions';
+import { specialtyLabel } from '../../utils/constants';
+
+const DEFAULT_CLINIC_ID = 'a1000000-0000-0000-0000-000000000001';
 
 export default function ProfessionalList() {
   const navigate = useNavigate();
@@ -19,8 +22,12 @@ export default function ProfessionalList() {
   const [query, setQuery] = useState('');
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ['professionals', query],
-    queryFn: () => professionalApi.list({ q: query || undefined }),
+    queryKey: ['professionals', 'list', query],
+    queryFn: () =>
+      professionalApi.listByClinic({
+        clinic_id: DEFAULT_CLINIC_ID,
+        ...(query ? { q: query } : {}),
+      }),
   });
 
   const columns: Column<Professional>[] = [
@@ -41,7 +48,8 @@ export default function ProfessionalList() {
     {
       key: 'licenses',
       label: 'Especialidades',
-      render: (p) => p.licenses?.filter((l) => l.is_valid).map((l) => l.specialty_code).join(', ') || '—',
+      render: (p) =>
+        p.licenses?.filter((l) => l.is_valid).map((l) => specialtyLabel(l.specialty_code)).join(', ') || '—',
     },
   ];
 
@@ -61,7 +69,7 @@ export default function ProfessionalList() {
       </Box>
 
       <TextField
-        placeholder="Buscar profesional..."
+        placeholder="Buscar por nombre o especialidad (ej: Orto, Cirugía, Estética, García)..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         fullWidth

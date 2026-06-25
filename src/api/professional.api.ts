@@ -43,7 +43,7 @@ export const professionalApi = {
     return response.data as { professional_id: string };
   },
 
-  listByClinic: async (params?: { clinic_id?: string; specialty?: string }): Promise<Professional[]> => {
+  listByClinic: async (params?: { clinic_id?: string; specialty?: string; q?: string }): Promise<Professional[]> => {
     const response = await apiClient.getInstance('PROFESSIONAL').get('/professionals', { params });
     return response.data;
   },

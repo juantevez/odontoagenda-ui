@@ -1,5 +1,30 @@
 export const DOC_TYPES = ['DNI', 'PASAPORTE', 'CUIT', 'CUIL', 'CE'] as const;
 
+// Especialidades odontológicas — código backend → nombre en español
+export const SPECIALTY_LABELS: Record<string, string> = {
+  // Core / Clínicas
+  ODONTOLOGIA_GENERAL:  'Odontología General',
+  ODONTOPEDIATRIA:      'Odontopediatría',
+  ORTODONCIA:           'Ortodoncia',
+  ENDODONCIA:           'Endodoncia',
+  // Quirúrgicas y Alta Complejidad
+  PERIODONCIA:          'Periodoncia',
+  IMPLANTOLOGIA:        'Implantología',
+  CIRUGIA_ORAL:         'Cirugía Oral',
+  CIRUGIA_MAXILOFACIAL: 'Cirugía Maxilofacial',
+  // Rehabilitación y Estética
+  REHABILITACION_ORAL:  'Rehabilitación Oral',
+  ESTETICA_DENTAL:      'Estética Dental',
+  // Diagnóstico y Soporte
+  ESTOMATOLOGIA:        'Estomatología',
+  IMAGENOLOGIA_DENTAL:  'Imaginología Dental',
+};
+
+/** Convierte un código de especialidad al nombre legible. */
+export function specialtyLabel(code: string): string {
+  return SPECIALTY_LABELS[code] ?? code;
+}
+
 export const GENDERS = [
   { value: 'M', label: 'Masculino' },
   { value: 'F', label: 'Femenino' },

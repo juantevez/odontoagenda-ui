@@ -44,11 +44,11 @@ export const schedulingApi = {
     professional_id?: string;
     clinic_id?: string;
     date?: string;
-  }): Promise<{ entries: DayScheduleEntry[] }> => {
+  }): Promise<{ entries: DayScheduleEntry[]; total_booked: number; completed_count: number }> => {
     const response = await apiClient.getInstance('SCHEDULING').get('/scheduling/day-schedule', {
       params,
     });
-    // Backend returns { appointments: AppointmentDTO[], free_slots: [], ... }
+    // Backend returns { appointments: AppointmentDTO[], free_slots: [], total_booked, total_free }
     const raw = response.data as {
       appointments?: Array<{
         id: string;
@@ -58,9 +58,11 @@ export const schedulingApi = {
         procedure_code: string;
         status: string;
       }>;
+      total_booked?: number;
     };
+    const appointments = raw.appointments ?? [];
     return {
-      entries: (raw.appointments ?? []).map((a) => ({
+      entries: appointments.map((a) => ({
         appointment_id: a.id,
         slot_start: a.slot_start,
         slot_end: a.slot_end,
@@ -68,6 +70,8 @@ export const schedulingApi = {
         procedure_name: a.procedure_code,
         status: a.status as DayScheduleEntry['status'],
       })),
+      total_booked: raw.total_booked ?? appointments.length,
+      completed_count: appointments.filter((a) => a.status === 'Completed').length,
     };
   },
 
