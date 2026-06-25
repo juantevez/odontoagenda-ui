@@ -23,7 +23,13 @@ const theme = createTheme({
     secondary: { main: '#dc004e' },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Source Sans 3", "Helvetica", "Arial", sans-serif',
+    h1: { fontFamily: '"Playfair Display", serif', fontWeight: 700 },
+    h2: { fontFamily: '"Playfair Display", serif', fontWeight: 700 },
+    h3: { fontFamily: '"Playfair Display", serif', fontWeight: 600 },
+    h4: { fontFamily: '"Playfair Display", serif', fontWeight: 600 },
+    h5: { fontFamily: '"Playfair Display", serif', fontWeight: 600 },
+    h6: { fontFamily: '"Playfair Display", serif', fontWeight: 600 },
   },
 });
 
