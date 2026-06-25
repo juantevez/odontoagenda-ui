@@ -7,6 +7,7 @@ const API_BASE_URLS = {
   SCHEDULING: import.meta.env.VITE_API_BASE_URL_SCHEDULING as string,
   COVERAGE: import.meta.env.VITE_API_BASE_URL_COVERAGE as string,
   BILLING: import.meta.env.VITE_API_BASE_URL_BILLING as string,
+  NOTIFICATIONS: import.meta.env.VITE_API_BASE_URL_NOTIFICATIONS as string,
 };
 
 class ApiClient {

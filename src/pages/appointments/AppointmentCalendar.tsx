@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import CancelIcon from '@mui/icons-material/Cancel';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -20,11 +28,11 @@ import {
 import { es } from 'date-fns/locale';
 import { useQueries } from '@tanstack/react-query';
 import { schedulingApi } from '../../api/scheduling.api';
-import { usePatientAppointments, useDaySchedule } from '../../hooks/useAppointments';
+import { usePatientAppointments, useDaySchedule, useCancelAppointment } from '../../hooks/useAppointments';
 import { useAuthStore } from '../../store/auth.store';
 import { usePermissions } from '../../hooks/usePermissions';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
-import { formatTime } from '../../utils/formatters';
+import { formatTime, formatDateTime } from '../../utils/formatters';
 import type { DayScheduleEntry } from '../../types/appointment.types';
 
 const DEFAULT_CLINIC_ID = 'a1000000-0000-0000-0000-000000000001';
@@ -38,8 +46,9 @@ const VIEW_LABELS: Record<CalendarView, string> = {
 };
 
 const WEEK_HEADER = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const CANCELLABLE = new Set(['scheduled', 'confirmed', 'Scheduled', 'Confirmed']);
 
-function EntryRow({ entry }: { entry: DayScheduleEntry }) {
+function EntryRow({ entry, onCancel }: { entry: DayScheduleEntry; onCancel?: (e: DayScheduleEntry) => void }) {
   return (
     <Box
       sx={{
@@ -65,17 +74,44 @@ function EntryRow({ entry }: { entry: DayScheduleEntry }) {
         color={APPOINTMENT_STATUS_COLORS[entry.status] ?? 'default'}
         size="small"
       />
+      {onCancel && CANCELLABLE.has(entry.status) && (
+        <Tooltip title="Cancelar turno">
+          <IconButton size="small" color="error" onClick={() => onCancel(entry)}>
+            <CancelIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
+}
+
+interface CancelState {
+  entry: DayScheduleEntry;
+  reason: string;
 }
 
 export default function AppointmentCalendar() {
   const navigate = useNavigate();
   const [view, setView] = useState<CalendarView>('week');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [cancelState, setCancelState] = useState<CancelState | null>(null);
+
+  const cancelMutation = useCancelAppointment();
 
   const user = useAuthStore((s) => s.user);
   const { isPatient } = usePermissions();
+
+  const handleCancelConfirm = async () => {
+    if (!cancelState) return;
+    await cancelMutation.mutateAsync({
+      id: cancelState.entry.appointment_id,
+      data: {
+        reason: isPatient ? 'patient_request' : 'staff_request',
+        note: cancelState.reason || undefined,
+      },
+    });
+    setCancelState(null);
+  };
   const clinicId = user?.clinic_ids?.[0] ?? DEFAULT_CLINIC_ID;
 
   // ── Derived ranges ────────────────────────────────────────────────
@@ -176,7 +212,7 @@ export default function AppointmentCalendar() {
       ) : selectedDayEntries.length === 0 ? (
         <Typography sx={{ p: 2 }} color="text.secondary">No hay turnos para este día</Typography>
       ) : (
-        selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} />)
+        selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
       )}
     </Paper>
   );
@@ -235,7 +271,7 @@ export default function AppointmentCalendar() {
         ) : selectedDayEntries.length === 0 ? (
           <Typography sx={{ p: 2 }} color="text.secondary">No hay turnos para este día</Typography>
         ) : (
-          selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} />)
+          selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
         )}
       </Box>
     </Paper>
@@ -339,7 +375,7 @@ export default function AppointmentCalendar() {
           ) : selectedDayEntries.length === 0 ? (
             <Typography sx={{ p: 2 }} color="text.secondary">Sin turnos</Typography>
           ) : (
-            selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} />)
+            selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
           )}
         </Box>
       </Paper>
@@ -395,6 +431,43 @@ export default function AppointmentCalendar() {
       {view === 'day'   && <DailyView />}
       {view === 'week'  && <WeeklyView />}
       {view === 'month' && <MonthlyView />}
+
+      <Dialog
+        open={Boolean(cancelState)}
+        onClose={() => !cancelMutation.isPending && setCancelState(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Cancelar turno</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            ¿Confirmás la cancelación del turno del{' '}
+            <strong>{cancelState ? formatDateTime(cancelState.entry.slot_start) : ''}</strong>?
+          </DialogContentText>
+          <TextField
+            label="Motivo (opcional)"
+            fullWidth
+            multiline
+            rows={2}
+            value={cancelState?.reason ?? ''}
+            onChange={(e) => setCancelState((s) => s && { ...s, reason: e.target.value })}
+            disabled={cancelMutation.isPending}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setCancelState(null)} disabled={cancelMutation.isPending}>
+            Volver
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancelConfirm}
+            disabled={cancelMutation.isPending}
+          >
+            {cancelMutation.isPending ? 'Cancelando...' : 'Confirmar cancelación'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

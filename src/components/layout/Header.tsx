@@ -9,6 +9,8 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthStore } from '../../store/auth.store';
+import { usePermissions } from '../../hooks/usePermissions';
+import NotificationBell from './NotificationBell';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -16,6 +18,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuthStore();
+  const { isStaff } = usePermissions();
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -28,6 +31,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         </Typography>
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isStaff && <NotificationBell />}
             <Tooltip title={user.role}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
                 {user.role[0].toUpperCase()}

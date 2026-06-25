@@ -38,6 +38,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: rewriteTo('/api/billing'),
       },
+      '/api/notifications': {
+        target: 'http://localhost:8086',
+        changeOrigin: true,
+        rewrite: rewriteTo('/api/notifications'),
+      },
     },
   },
   test: {
