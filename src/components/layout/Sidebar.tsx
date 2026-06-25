@@ -12,18 +12,49 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import BadgeIcon from '@mui/icons-material/Badge';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAuthStore } from '../../store/auth.store';
+import type { UserRole } from '../../types/user.types';
 
 const DRAWER_WIDTH = 240;
 
-const navItems = [
-  { label: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: [] },
-  { label: 'Pacientes', icon: <PeopleIcon />, path: '/patients', roles: [] },
-  { label: 'Turnos', icon: <CalendarMonthIcon />, path: '/appointments', roles: [] },
-  { label: 'Profesionales', icon: <BadgeIcon />, path: '/professionals', roles: ['admin', 'staff'] },
-  { label: 'Facturación', icon: <ReceiptIcon />, path: '/billing', roles: ['admin', 'staff'] },
-  { label: 'Configuración', icon: <SettingsIcon />, path: '/settings', roles: [] },
+interface NavItem {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  allowedRoles?: UserRole[];
+}
+
+const navItems: NavItem[] = [
+  { label: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+  {
+    label: 'Pacientes',
+    icon: <PeopleIcon />,
+    path: '/patients',
+    allowedRoles: ['superadmin', 'admin_sucursal', 'recepcionista'],
+  },
+  {
+    label: 'Mi perfil',
+    icon: <PersonIcon />,
+    path: '/my-patient-profile',
+    allowedRoles: ['paciente'],
+  },
+  { label: 'Turnos', icon: <CalendarMonthIcon />, path: '/appointments' },
+  {
+    label: 'Profesionales',
+    icon: <BadgeIcon />,
+    path: '/professionals',
+    allowedRoles: ['superadmin', 'admin_sucursal', 'recepcionista'],
+  },
+  {
+    label: 'Facturación',
+    icon: <ReceiptIcon />,
+    path: '/billing',
+    allowedRoles: ['superadmin', 'admin_sucursal', 'recepcionista'],
+  },
+  { label: 'Configuración', icon: <SettingsIcon />, path: '/settings' },
 ];
 
 interface SidebarProps {
@@ -33,11 +64,28 @@ interface SidebarProps {
 export default function Sidebar({ open }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isStaff } = usePermissions();
+  const { hasRole } = usePermissions();
+  const user = useAuthStore((s) => s.user);
 
-  const visibleItems = navItems.filter(
-    (item) => item.roles.length === 0 || (item.roles.includes('staff') && isStaff)
+  const visibleItems = navItems.filter((item) =>
+    item.allowedRoles ? hasRole(...item.allowedRoles) : true
   );
+
+  const getPath = (item: NavItem): string => {
+    if (item.path === '/my-patient-profile') {
+      return user?.patient_id ? `/patients/${user.patient_id}` : '/dashboard';
+    }
+    return item.path;
+  };
+
+  const isSelected = (item: NavItem): boolean => {
+    if (item.path === '/my-patient-profile') {
+      return user?.patient_id
+        ? location.pathname === `/patients/${user.patient_id}`
+        : false;
+    }
+    return location.pathname.startsWith(item.path);
+  };
 
   return (
     <Drawer
@@ -55,8 +103,8 @@ export default function Sidebar({ open }: SidebarProps) {
         {visibleItems.map((item) => (
           <ListItem key={item.path} disablePadding>
             <ListItemButton
-              selected={location.pathname.startsWith(item.path)}
-              onClick={() => navigate(item.path)}
+              selected={isSelected(item)}
+              onClick={() => navigate(getPath(item))}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.label} />

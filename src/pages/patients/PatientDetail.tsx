@@ -5,17 +5,21 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Loading from '../../components/common/Loading';
 import { usePatient } from '../../hooks/usePatients';
-import { formatDate } from '../../utils/formatters';
+import { usePatientAppointments } from '../../hooks/useAppointments';
+import { formatDate, formatDateTime } from '../../utils/formatters';
+import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
 import type { PatientDetail as PatientDetailType } from '../../types/patient.types';
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: patient, isLoading } = usePatient(id ?? '');
+  const { data: apptData, isLoading: apptLoading } = usePatientAppointments(id ?? '');
 
   if (isLoading) return <Loading />;
   if (!patient) return <Typography>Paciente no encontrado</Typography>;
@@ -87,13 +91,46 @@ export default function PatientDetail() {
         )}
 
         <Grid item xs={12}>
-          <Button
-            variant="outlined"
-            startIcon={<CalendarMonthIcon />}
-            onClick={() => navigate(`/appointments/new?patient_id=${p.id}`)}
-          >
-            Nuevo turno
-          </Button>
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">Turnos</Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CalendarMonthIcon />}
+                onClick={() => navigate(`/appointments/new?patient_id=${p.id}`)}
+              >
+                Nuevo turno
+              </Button>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            {apptLoading ? (
+              <Typography color="text.secondary">Cargando turnos...</Typography>
+            ) : (apptData?.items ?? []).length === 0 ? (
+              <Typography color="text.secondary">Sin turnos registrados</Typography>
+            ) : (
+              (apptData?.items ?? []).map((a) => (
+                <Box
+                  key={a.appointment_id}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" fontWeight={500}>
+                      {formatDateTime(a.slot_start)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {a.procedure_name} — {a.professional_name}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={APPOINTMENT_STATUS_LABELS[a.status] ?? a.status}
+                    color={APPOINTMENT_STATUS_COLORS[a.status] ?? 'default'}
+                    size="small"
+                  />
+                </Box>
+              ))
+            )}
+          </Paper>
         </Grid>
       </Grid>
     </Box>

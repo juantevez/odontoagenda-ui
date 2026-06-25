@@ -6,6 +6,8 @@ import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import Table, { type Column } from '../../components/common/Table';
 import { usePatientAppointments } from '../../hooks/useAppointments';
+import { useAuthStore } from '../../store/auth.store';
+import { usePermissions } from '../../hooks/usePermissions';
 import { formatDateTime } from '../../utils/formatters';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
 import type { Appointment } from '../../types/appointment.types';
@@ -13,7 +15,13 @@ import type { Appointment } from '../../types/appointment.types';
 export default function AppointmentList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const patientId = searchParams.get('patient_id') ?? '';
+  const user = useAuthStore((s) => s.user);
+  const { isPatient } = usePermissions();
+
+  // Si hay patient_id en la URL, usarlo (ej: desde perfil del paciente).
+  // Si el usuario es paciente, mostrar sus propios turnos.
+  const urlPatientId = searchParams.get('patient_id') ?? '';
+  const patientId = urlPatientId || (isPatient ? (user?.patient_id ?? '') : '');
 
   const { data, isLoading } = usePatientAppointments(patientId);
 

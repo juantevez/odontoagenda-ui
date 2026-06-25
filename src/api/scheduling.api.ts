@@ -13,7 +13,17 @@ export const schedulingApi = {
     const response = await apiClient.getInstance('SCHEDULING').get('/scheduling/availability', {
       params: query,
     });
-    return response.data;
+    // Backend returns { free_slots: [{ slot_start, slot_end, ... }] }
+    // Map to the TimeSlot shape the UI expects: { start, end, available }
+    const raw = response.data as { date?: string; free_slots?: { slot_start: string; slot_end: string }[] };
+    return {
+      date: raw.date ?? query.date,
+      slots: (raw.free_slots ?? []).map((s) => ({
+        start: s.slot_start,
+        end: s.slot_end,
+        available: true,
+      })),
+    };
   },
 
   getAvailabilityRange: async (params: {
@@ -38,7 +48,27 @@ export const schedulingApi = {
     const response = await apiClient.getInstance('SCHEDULING').get('/scheduling/day-schedule', {
       params,
     });
-    return response.data;
+    // Backend returns { appointments: AppointmentDTO[], free_slots: [], ... }
+    const raw = response.data as {
+      appointments?: Array<{
+        id: string;
+        slot_start: string;
+        slot_end: string;
+        patient_id: string;
+        procedure_code: string;
+        status: string;
+      }>;
+    };
+    return {
+      entries: (raw.appointments ?? []).map((a) => ({
+        appointment_id: a.id,
+        slot_start: a.slot_start,
+        slot_end: a.slot_end,
+        patient_name: a.patient_id,
+        procedure_name: a.procedure_code,
+        status: a.status as DayScheduleEntry['status'],
+      })),
+    };
   },
 
   getPatientAppointments: async (
@@ -49,7 +79,42 @@ export const schedulingApi = {
       `/scheduling/patients/${patientId}/appointments`,
       { params: { only_active: onlyActive } }
     );
-    return response.data;
+
+    type RawDTO = {
+      id: string;
+      patient_id: string;
+      professional_id: string;
+      clinic_id: string;
+      procedure_code: string;
+      slot_start: string;
+      slot_end: string;
+      status: string;
+      coverage_type?: string;
+      created_at: string;
+    };
+
+    // Backend returns []AppointmentDTO directly (array, not wrapped)
+    const raw: RawDTO[] = Array.isArray(response.data)
+      ? (response.data as RawDTO[])
+      : ((response.data as { items?: RawDTO[] }).items ?? []);
+
+    return {
+      items: raw.map((dto) => ({
+        appointment_id: dto.id,
+        patient_id: dto.patient_id,
+        patient_name: dto.patient_id,
+        professional_id: dto.professional_id,
+        professional_name: dto.professional_id,
+        clinic_id: dto.clinic_id,
+        procedure_code: dto.procedure_code,
+        procedure_name: dto.procedure_code,
+        slot_start: dto.slot_start,
+        slot_end: dto.slot_end,
+        status: dto.status as Appointment['status'],
+        coverage_type: dto.coverage_type,
+        created_at: dto.created_at,
+      })),
+    };
   },
 
   bookAppointment: async (data: BookAppointmentCommand) => {

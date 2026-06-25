@@ -33,8 +33,22 @@ export default function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
 
-      <Route path="/patients" element={<ProtectedRoute><PatientList /></ProtectedRoute>} />
-      <Route path="/patients/new" element={<ProtectedRoute><PatientFormPage /></ProtectedRoute>} />
+      <Route
+        path="/patients"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin', 'admin_sucursal', 'recepcionista']}>
+            <PatientList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients/new"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin', 'admin_sucursal', 'recepcionista']}>
+            <PatientFormPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/patients/:id" element={<ProtectedRoute><PatientDetail /></ProtectedRoute>} />
 
       <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
