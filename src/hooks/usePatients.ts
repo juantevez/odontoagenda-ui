@@ -14,7 +14,7 @@ export function usePatient(patientId: string) {
   return useQuery({
     queryKey: ['patient', patientId],
     queryFn: () => patientApi.getById(patientId),
-    enabled: Boolean(patientId),
+    enabled: Boolean(patientId) && patientId !== 'undefined',
   });
 }
 

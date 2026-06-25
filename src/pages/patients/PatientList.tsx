@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import Chip from '@mui/material/Chip';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Table, { type Column } from '../../components/common/Table';
 import { usePatientSearch } from '../../hooks/usePatients';
 import { formatDate } from '../../utils/formatters';
@@ -27,17 +27,23 @@ export default function PatientList() {
 
   const columns: Column<Patient>[] = [
     { key: 'full_name', label: 'Nombre' },
-    { key: 'doc_number', label: 'Documento' },
+    {
+      key: 'document_number',
+      label: 'Documento',
+      render: (p) => `${p.document_type} ${p.document_number}`,
+    },
     {
       key: 'birth_date',
       label: 'Fecha nacimiento',
-      render: (p) => formatDate(p.birth_date),
+      render: (p) => `${formatDate(p.birth_date)} (${p.age_years} años)`,
     },
     { key: 'phone', label: 'Teléfono' },
     {
-      key: 'email',
-      label: 'Email',
-      render: (p) => p.email ? <Chip label={p.email} size="small" /> : '—',
+      key: 'has_alerts',
+      label: 'Alertas',
+      render: (p) => p.has_alerts
+        ? <WarningAmberIcon color="warning" fontSize="small" />
+        : '—',
     },
   ];
 
@@ -55,7 +61,7 @@ export default function PatientList() {
       </Box>
 
       <TextField
-        placeholder="Buscar por nombre, documento..."
+        placeholder="Buscar por nombre, documento o teléfono..."
         value={query}
         onChange={(e) => { setQuery(e.target.value); setPage(0); }}
         fullWidth
@@ -70,14 +76,14 @@ export default function PatientList() {
       <Table
         columns={columns}
         rows={data?.items ?? []}
-        rowKey={(p) => p.patient_id}
+        rowKey={(p) => p.id}
         isLoading={isLoading}
         total={data?.total}
         page={page}
         rowsPerPage={rowsPerPage}
         onPageChange={setPage}
         onRowsPerPageChange={(rpp) => { setRowsPerPage(rpp); setPage(0); }}
-        onRowClick={(p) => navigate(`/patients/${p.patient_id}`)}
+        onRowClick={(p) => navigate(`/patients/${p.id}`)}
         emptyMessage="No se encontraron pacientes"
       />
     </Box>

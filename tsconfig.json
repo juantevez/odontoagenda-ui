@@ -15,9 +15,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    // 1. Eliminamos "baseUrl"
+    // 2. Ajustamos los paths usando "./"
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"] 
     }
   },
   "include": ["src"],

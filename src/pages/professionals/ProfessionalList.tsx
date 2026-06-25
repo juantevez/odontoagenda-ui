@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -8,6 +7,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Chip from '@mui/material/Chip';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Table, { type Column } from '../../components/common/Table';
 import { professionalApi, type Professional } from '../../api/professional.api';
@@ -18,7 +18,7 @@ export default function ProfessionalList() {
   const { isAdmin } = usePermissions();
   const [query, setQuery] = useState('');
 
-  const { data, isLoading } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ['professionals', query],
     queryFn: () => professionalApi.list({ q: query || undefined }),
   });
@@ -28,15 +28,20 @@ export default function ProfessionalList() {
     { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Teléfono' },
     {
-      key: 'is_active',
+      key: 'status',
       label: 'Estado',
       render: (p) => (
         <Chip
-          label={p.is_active ? 'Activo' : 'Suspendido'}
-          color={p.is_active ? 'success' : 'error'}
+          label={p.status === 'Active' ? 'Activo' : 'Suspendido'}
+          color={p.status === 'Active' ? 'success' : 'error'}
           size="small"
         />
       ),
+    },
+    {
+      key: 'licenses',
+      label: 'Especialidades',
+      render: (p) => p.licenses?.filter((l) => l.is_valid).map((l) => l.specialty_code).join(', ') || '—',
     },
   ];
 
@@ -70,8 +75,8 @@ export default function ProfessionalList() {
 
       <Table
         columns={columns}
-        rows={data?.items ?? []}
-        rowKey={(p) => p.professional_id}
+        rows={Array.isArray(data) ? data : []}
+        rowKey={(p) => p.id}
         isLoading={isLoading}
         emptyMessage="No se encontraron profesionales"
       />

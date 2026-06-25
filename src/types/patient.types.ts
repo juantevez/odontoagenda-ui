@@ -1,16 +1,36 @@
+// Patient summary — devuelto por GET /patients (lista/búsqueda)
 export interface Patient {
-  patient_id: string;
+  id: string;           // backend devuelve "id"
   full_name: string;
   birth_date: string;
-  gender: string;
-  doc_type: string;
-  doc_number: string;
+  age_years?: number;
+  document_type: string;  // backend: "document_type"
+  document_number: string; // backend: "document_number"
   phone: string;
-  email?: string;
-  emergency_name?: string;
-  emergency_phone?: string;
+  has_alerts?: boolean;
+  risk_level?: string;
+}
+
+// Patient detail — devuelto por GET /patients/:id
+export interface PatientDetail {
+  id: string;
+  full_name: string;
+  birth_date: string;
+  age_years: number;
+  is_minor: boolean;
+  gender: string;
+  national_id: { type: string; number: string };
+  contact_info: {
+    phone: string;
+    email?: string;
+    whatsapp?: string;
+    emergency_name?: string;
+    emergency_phone?: string;
+  };
+  active_coverage?: Coverage;
+  active_alerts: MedicalAlert[];
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface Coverage {
@@ -65,4 +85,5 @@ export interface PatientListResponse {
   total: number;
   limit: number;
   offset: number;
+  has_more: boolean;
 }

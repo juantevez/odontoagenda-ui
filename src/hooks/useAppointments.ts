@@ -1,10 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { schedulingApi } from '../api/scheduling.api';
+import { professionalApi } from '../api/professional.api';
 import type {
   AvailabilityQuery,
   BookAppointmentCommand,
   CancelAppointmentCommand,
 } from '../types/appointment.types';
+
+export function useProfessionals(clinicId?: string) {
+  return useQuery({
+    queryKey: ['professionals', clinicId],
+    queryFn: () => {
+      const params = clinicId ? { clinic_id: clinicId } : undefined;
+      return professionalApi.listByClinic(params);
+    },
+    staleTime: 60_000,
+  });
+}
 
 export function usePatientAppointments(patientId: string, onlyActive?: boolean) {
   return useQuery({

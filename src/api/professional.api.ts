@@ -1,14 +1,23 @@
 import { apiClient } from './api.client';
 
+export interface LicenseDTO {
+  id: string;
+  specialty_code: string;
+  specialty_name: string;
+  license_number: string;
+  is_valid: boolean;
+  expires_at?: string;
+  status: string;
+}
+
 export interface Professional {
-  professional_id: string;
+  id: string;
   full_name: string;
-  doc_type: string;
-  doc_number: string;
   email: string;
   phone: string;
   bio?: string;
-  is_active: boolean;
+  status: string;
+  licenses: LicenseDTO[];
 }
 
 export interface RegisterProfessionalCommand {
@@ -34,9 +43,14 @@ export const professionalApi = {
     return response.data as { professional_id: string };
   },
 
+  listByClinic: async (params?: { clinic_id?: string; specialty?: string }): Promise<Professional[]> => {
+    const response = await apiClient.getInstance('PROFESSIONAL').get('/professionals', { params });
+    return response.data;
+  },
+
   list: async (params?: { q?: string; limit?: number; offset?: number }) => {
     const response = await apiClient.getInstance('PROFESSIONAL').get('/professionals', { params });
-    return response.data as { items: Professional[]; total: number };
+    return response.data as Professional[];
   },
 
   getById: async (professionalId: string): Promise<Professional> => {
