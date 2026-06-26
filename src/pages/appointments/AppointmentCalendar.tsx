@@ -8,6 +8,7 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import CancelIcon from '@mui/icons-material/Cancel';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -28,7 +29,7 @@ import {
 import { es } from 'date-fns/locale';
 import { useQueries } from '@tanstack/react-query';
 import { schedulingApi } from '../../api/scheduling.api';
-import { usePatientAppointments, useDaySchedule, useCancelAppointment } from '../../hooks/useAppointments';
+import { usePatientAppointments, useDaySchedule, useCancelAppointment, useCheckIn } from '../../hooks/useAppointments';
 import { useAuthStore } from '../../store/auth.store';
 import { usePermissions } from '../../hooks/usePermissions';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
@@ -48,7 +49,15 @@ const VIEW_LABELS: Record<CalendarView, string> = {
 const WEEK_HEADER = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const CANCELLABLE = new Set(['scheduled', 'confirmed', 'Scheduled', 'Confirmed']);
 
-function EntryRow({ entry, onCancel }: { entry: DayScheduleEntry; onCancel?: (e: DayScheduleEntry) => void }) {
+function EntryRow({
+  entry,
+  onCancel,
+  onCheckIn,
+}: {
+  entry: DayScheduleEntry;
+  onCancel?: (e: DayScheduleEntry) => void;
+  onCheckIn?: (e: DayScheduleEntry) => void;
+}) {
   return (
     <Box
       sx={{
@@ -74,6 +83,13 @@ function EntryRow({ entry, onCancel }: { entry: DayScheduleEntry; onCancel?: (e:
         color={APPOINTMENT_STATUS_COLORS[entry.status] ?? 'default'}
         size="small"
       />
+      {onCheckIn && entry.status === 'Confirmed' && (
+        <Tooltip title="Dar presente">
+          <IconButton size="small" color="success" onClick={() => onCheckIn(entry)}>
+            <HowToRegIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {onCancel && CANCELLABLE.has(entry.status) && (
         <Tooltip title="Cancelar turno">
           <IconButton size="small" color="error" onClick={() => onCancel(entry)}>
@@ -97,9 +113,10 @@ export default function AppointmentCalendar() {
   const [cancelState, setCancelState] = useState<CancelState | null>(null);
 
   const cancelMutation = useCancelAppointment();
+  const checkInMutation = useCheckIn();
 
   const user = useAuthStore((s) => s.user);
-  const { isPatient } = usePermissions();
+  const { isPatient, isStaff } = usePermissions();
 
   const handleCancelConfirm = async () => {
     if (!cancelState) return;
@@ -212,7 +229,7 @@ export default function AppointmentCalendar() {
       ) : selectedDayEntries.length === 0 ? (
         <Typography sx={{ p: 2 }} color="text.secondary">No hay turnos para este día</Typography>
       ) : (
-        selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
+        selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} onCheckIn={isStaff ? (entry) => checkInMutation.mutate(entry.appointment_id) : undefined} />)
       )}
     </Paper>
   );
@@ -271,7 +288,7 @@ export default function AppointmentCalendar() {
         ) : selectedDayEntries.length === 0 ? (
           <Typography sx={{ p: 2 }} color="text.secondary">No hay turnos para este día</Typography>
         ) : (
-          selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
+          selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} onCheckIn={isStaff ? (entry) => checkInMutation.mutate(entry.appointment_id) : undefined} />)
         )}
       </Box>
     </Paper>
@@ -375,7 +392,7 @@ export default function AppointmentCalendar() {
           ) : selectedDayEntries.length === 0 ? (
             <Typography sx={{ p: 2 }} color="text.secondary">Sin turnos</Typography>
           ) : (
-            selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} />)
+            selectedDayEntries.map((e) => <EntryRow key={e.appointment_id} entry={e} onCancel={(entry) => setCancelState({ entry, reason: '' })} onCheckIn={isStaff ? (entry) => checkInMutation.mutate(entry.appointment_id) : undefined} />)
           )}
         </Box>
       </Paper>

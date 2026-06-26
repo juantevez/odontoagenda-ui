@@ -9,6 +9,7 @@ import Divider from '@mui/material/Divider';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import TodayIcon from '@mui/icons-material/Today';
 import BadgeIcon from '@mui/icons-material/Badge';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -42,6 +43,12 @@ const navItems: NavItem[] = [
     allowedRoles: ['paciente'],
   },
   { label: 'Turnos', icon: <CalendarMonthIcon />, path: '/appointments' },
+  {
+    label: 'Agenda Clínica',
+    icon: <TodayIcon />,
+    path: '/professional/schedule',
+    allowedRoles: ['superadmin', 'admin_sucursal', 'recepcionista', 'profesional'],
+  },
   {
     label: 'Profesionales',
     icon: <BadgeIcon />,

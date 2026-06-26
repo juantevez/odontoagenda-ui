@@ -34,11 +34,15 @@ export function useAvailability(query: AvailabilityQuery) {
   });
 }
 
-export function useDaySchedule(params: { professional_id?: string; clinic_id?: string; date?: string }) {
+export function useDaySchedule(
+  params: { professional_id?: string; clinic_id?: string; date?: string },
+  options?: { refetchInterval?: number }
+) {
   return useQuery({
     queryKey: ['day-schedule', params],
     queryFn: () => schedulingApi.getDaySchedule(params),
     enabled: Boolean(params.date),
+    refetchInterval: options?.refetchInterval,
   });
 }
 
@@ -68,6 +72,18 @@ export function useCheckIn() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (appointmentId: string) => schedulingApi.checkIn(appointmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['day-schedule'] });
+    },
+  });
+}
+
+export function useCompleteAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, clinicalNotes }: { id: string; clinicalNotes?: string }) =>
+      schedulingApi.completeAppointment(id, clinicalNotes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       queryClient.invalidateQueries({ queryKey: ['day-schedule'] });

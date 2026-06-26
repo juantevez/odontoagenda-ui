@@ -1,10 +1,18 @@
 export type AppointmentStatus =
+  // lowercase (legacy frontend / patient service)
   | 'scheduled'
   | 'confirmed'
   | 'checked_in'
   | 'completed'
   | 'cancelled'
-  | 'no_show';
+  | 'no_show'
+  // PascalCase (scheduling service / backend domain)
+  | 'Pending'
+  | 'Confirmed'
+  | 'InProgress'
+  | 'Completed'
+  | 'Cancelled'
+  | 'NoShow';
 
 export interface Appointment {
   appointment_id: string;

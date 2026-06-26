@@ -48,6 +48,7 @@ class ApiClient {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user_id');
+            localStorage.removeItem('auth-storage');
             window.location.href = '/login';
           }
           return Promise.reject(error);

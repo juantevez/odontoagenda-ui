@@ -40,21 +40,37 @@ export const USER_ROLES = [
 ] as const;
 
 export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Programado',
-  confirmed: 'Confirmado',
+  // lowercase (legacy / frontend-only)
+  scheduled:  'Programado',
+  confirmed:  'Confirmado',
   checked_in: 'En sala',
-  completed: 'Completado',
-  cancelled: 'Cancelado',
-  no_show: 'No se presentó',
+  completed:  'Completado',
+  cancelled:  'Cancelado',
+  no_show:    'No se presentó',
+  // PascalCase (backend domain values)
+  Pending:    'Pendiente',
+  Confirmed:  'Confirmado',
+  InProgress: 'En sala',
+  Completed:  'Completado',
+  Cancelled:  'Cancelado',
+  NoShow:     'No se presentó',
 };
 
 export const APPOINTMENT_STATUS_COLORS: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning' | 'info'> = {
-  scheduled: 'info',
-  confirmed: 'primary',
-  checked_in: 'warning',
-  completed: 'success',
-  cancelled: 'error',
-  no_show: 'default',
+  // lowercase
+  scheduled:  'info',
+  confirmed:  'primary',
+  checked_in: 'success',
+  completed:  'info',
+  cancelled:  'error',
+  no_show:    'default',
+  // PascalCase
+  Pending:    'default',
+  Confirmed:  'primary',
+  InProgress: 'success',
+  Completed:  'info',
+  Cancelled:  'error',
+  NoShow:     'warning',
 };
 
 export const PAYMENT_METHODS = [

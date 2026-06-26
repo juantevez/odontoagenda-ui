@@ -15,6 +15,7 @@ import AppointmentList from '../pages/appointments/AppointmentList';
 import AppointmentBooking from '../pages/appointments/AppointmentBooking';
 import ProfessionalList from '../pages/professionals/ProfessionalList';
 import ProfessionalFormPage from '../pages/professionals/ProfessionalForm';
+import ProfessionalSchedule from '../pages/professional/ProfessionalSchedule';
 import QuoteList from '../pages/billing/QuoteList';
 import PaymentFormPage from '../pages/billing/PaymentForm';
 import Reports from '../pages/billing/Reports';
@@ -54,6 +55,15 @@ export default function AppRoutes() {
       <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
       <Route path="/appointments/list" element={<ProtectedRoute><AppointmentList /></ProtectedRoute>} />
       <Route path="/appointments/new" element={<ProtectedRoute><AppointmentBooking /></ProtectedRoute>} />
+
+      <Route
+        path="/professional/schedule"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin', 'admin_sucursal', 'recepcionista', 'profesional']}>
+            <ProfessionalSchedule />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/professionals"
