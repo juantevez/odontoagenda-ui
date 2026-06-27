@@ -165,4 +165,20 @@ export const schedulingApi = {
   }): Promise<void> => {
     await apiClient.getInstance('SCHEDULING').post('/scheduling/block-slot', data);
   },
+
+  holdSlot: async (data: {
+    professional_id: string;
+    clinic_id: string;
+    slot_start: string;
+    slot_end: string;
+  }): Promise<{ hold_id: string; expires_at: string }> => {
+    const res = await apiClient.getInstance('SCHEDULING').post<{ hold_id: string; expires_at: string }>(
+      '/scheduling/hold', data,
+    );
+    return res.data;
+  },
+
+  releaseHold: async (holdId: string): Promise<void> => {
+    await apiClient.getInstance('SCHEDULING').delete(`/scheduling/hold/${holdId}`);
+  },
 };

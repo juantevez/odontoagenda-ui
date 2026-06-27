@@ -13,6 +13,7 @@ import PatientFormPage from '../pages/patients/PatientForm';
 import AppointmentCalendar from '../pages/appointments/AppointmentCalendar';
 import AppointmentList from '../pages/appointments/AppointmentList';
 import AppointmentBooking from '../pages/appointments/AppointmentBooking';
+import ToothMapBooking from '../pages/appointments/ToothMapBooking';
 import ProfessionalList from '../pages/professionals/ProfessionalList';
 import ProfessionalFormPage from '../pages/professionals/ProfessionalForm';
 import ProfessionalSchedule from '../pages/professional/ProfessionalSchedule';
@@ -55,6 +56,7 @@ export default function AppRoutes() {
       <Route path="/appointments" element={<ProtectedRoute><AppointmentCalendar /></ProtectedRoute>} />
       <Route path="/appointments/list" element={<ProtectedRoute><AppointmentList /></ProtectedRoute>} />
       <Route path="/appointments/new" element={<ProtectedRoute><AppointmentBooking /></ProtectedRoute>} />
+      <Route path="/book" element={<ProtectedRoute><ToothMapBooking /></ProtectedRoute>} />
 
       <Route
         path="/professional/schedule"

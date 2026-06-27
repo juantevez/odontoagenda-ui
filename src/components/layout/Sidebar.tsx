@@ -8,12 +8,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Divider from '@mui/material/Divider';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import TodayIcon from '@mui/icons-material/Today';
 import BadgeIcon from '@mui/icons-material/Badge';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PersonIcon from '@mui/icons-material/Person';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAuthStore } from '../../store/auth.store';
@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
     path: '/my-patient-profile',
     allowedRoles: ['paciente'],
   },
-  { label: 'Turnos', icon: <CalendarMonthIcon />, path: '/appointments' },
+  { label: 'Reservar turno', icon: <MedicalServicesIcon />, path: '/book' },
   {
     label: 'Agenda Clínica',
     icon: <TodayIcon />,

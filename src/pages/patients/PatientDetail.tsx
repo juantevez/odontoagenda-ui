@@ -510,7 +510,7 @@ export default function PatientDetail() {
                 variant="outlined"
                 size="small"
                 startIcon={<CalendarMonthIcon />}
-                onClick={() => navigate(`/appointments/new?patient_id=${p.id}`)}
+                onClick={() => navigate(`/book?patient_id=${p.id}`)}
               >
                 Nuevo turno
               </Button>
