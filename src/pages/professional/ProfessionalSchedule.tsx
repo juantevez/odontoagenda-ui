@@ -77,7 +77,8 @@ export default function ProfessionalSchedule() {
   const complete = useCompleteAppointment();
   const cancel = useCancelAppointment();
 
-  const entries = schedule?.entries ?? [];
+  const allEntries = schedule?.entries ?? [];
+  const entries = allEntries.filter((e) => e.status !== 'Cancelled' && e.status !== 'NoShow');
 
   const handleComplete = async () => {
     if (!completeState) return;
@@ -160,11 +161,19 @@ export default function ProfessionalSchedule() {
       </Box>
 
       {/* Summary chips */}
-      {!scheduleLoading && entries.length > 0 && (
+      {!scheduleLoading && (entries.length > 0 || allEntries.length > 0) && (
         <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
           <Chip label={`${entries.length} turnos`} size="small" variant="outlined" />
           <Chip label={`${entries.filter((e) => e.status === 'InProgress').length} en sala`} size="small" color="success" variant="outlined" />
           <Chip label={`${entries.filter((e) => e.status === 'Completed').length} completados`} size="small" color="info" variant="outlined" />
+          {allEntries.filter((e) => e.status === 'Cancelled' || e.status === 'NoShow').length > 0 && (
+            <Chip
+              label={`${allEntries.filter((e) => e.status === 'Cancelled' || e.status === 'NoShow').length} cancelados/ausentes`}
+              size="small"
+              color="error"
+              variant="outlined"
+            />
+          )}
         </Box>
       )}
 

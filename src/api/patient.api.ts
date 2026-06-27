@@ -1,7 +1,6 @@
 import { apiClient } from './api.client';
 import type {
   Patient,
-  Coverage,
   RegisterPatientCommand,
   PatientSearchParams,
   PatientListResponse,
@@ -28,12 +27,19 @@ export const patientApi = {
     return response.data;
   },
 
-  addCoverage: async (patientId: string, coverage: Partial<Coverage>) => {
+  addCoverage: async (patientId: string, coverage: Record<string, unknown>) => {
     const response = await apiClient.getInstance('PATIENT').post(
       `/patients/${patientId}/coverage`,
       coverage
     );
-    return response.data as { coverage_id: string };
+    return response.data as { id: string };
+  },
+
+  updateContact: async (
+    patientId: string,
+    data: { phone: string; email?: string; whatsapp?: string; emergency_name?: string; emergency_phone?: string }
+  ) => {
+    await apiClient.getInstance('PATIENT').put(`/patients/${patientId}/contact`, data);
   },
 
   addMedicalAlert: async (

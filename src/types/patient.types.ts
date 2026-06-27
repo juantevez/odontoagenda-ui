@@ -34,8 +34,8 @@ export interface PatientDetail {
 }
 
 export interface Coverage {
-  coverage_id: string;
-  coverage_type: string;
+  id: string;
+  type: string;
   provider_name: string;
   plan_code: string;
   membership_number: string;
@@ -43,7 +43,19 @@ export interface Coverage {
   valid_until?: string;
   co_pay_percent?: number;
   co_pay_fixed_cents?: number;
+  requires_external_authorization?: boolean;
 }
+
+export const COVERAGE_TYPE_LABELS: Record<string, string> = {
+  Privado:          'Particular (privado)',
+  PrepagaPropia:    'Plan propio de la clínica',
+  PrepagaExterna:   'Prepaga externa',
+  ObraSocial:       'Obra social',
+  Corporativo:      'Corporativo',
+  ConvenioEspecial: 'Convenio especial',
+};
+
+export const COVERAGE_TYPES = Object.keys(COVERAGE_TYPE_LABELS);
 
 export interface MedicalAlert {
   alert_id: string;
