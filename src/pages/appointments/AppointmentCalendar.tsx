@@ -34,6 +34,7 @@ import { useAuthStore } from '../../store/auth.store';
 import { usePermissions } from '../../hooks/usePermissions';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
 import { formatTime, formatDateTime } from '../../utils/formatters';
+import { apptCode, patientCode, procedureLabel } from '../../utils/appointmentCode';
 import type { DayScheduleEntry } from '../../types/appointment.types';
 
 const DEFAULT_CLINIC_ID = 'a1000000-0000-0000-0000-000000000001';
@@ -74,9 +75,22 @@ function EntryRow({
       <Typography sx={{ minWidth: 110, fontVariantNumeric: 'tabular-nums' }} color="text.secondary">
         {formatTime(entry.slot_start)} – {formatTime(entry.slot_end)}
       </Typography>
-      <Box sx={{ flex: 1 }}>
-        <Typography fontWeight={500}>{entry.patient_name}</Typography>
-        <Typography variant="caption" color="text.secondary">{entry.procedure_name}</Typography>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
+          <Typography
+            variant="body2"
+            fontWeight={700}
+            sx={{ fontFamily: 'monospace', letterSpacing: 0.8, color: 'primary.main' }}
+          >
+            {apptCode(entry.appointment_id, entry.slot_start, entry.procedure_name)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {patientCode(entry.patient_name)}
+          </Typography>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          {procedureLabel(entry.procedure_name)}
+        </Typography>
       </Box>
       <Chip
         label={APPOINTMENT_STATUS_LABELS[entry.status] ?? entry.status}

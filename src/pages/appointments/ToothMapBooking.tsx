@@ -234,7 +234,9 @@ function ConfirmDialog({
 
   if (!slot) return null;
 
-  const slotDate  = parseISO(slot.slotStart);
+  // slice(0,16) descarta el sufijo 'Z' para que parseISO trate el horario como
+  // hora local de la clínica (el backend guarda naive timestamps con 'Z').
+  const slotDate  = parseISO(slot.slotStart.slice(0, 16));
   const dateLabel = format(slotDate, "EEEE d 'de' MMMM", { locale: es });
   const time      = format(slotDate, 'HH:mm');
 
@@ -262,7 +264,7 @@ function ConfirmDialog({
     holdIdRef.current = null; // el hold queda obsoleto, el cleanup lo eliminará
     onBooked({
       appointmentId:    result.appointment_id,
-      patientName:      'Paciente',
+      patientName:      selectedPatient?.full_name ?? 'Paciente',
       professionalName: slot.professionalName,
       procedureCode:    procedure,
       slotStart:        slot.slotStart,
@@ -492,7 +494,10 @@ export default function ToothMapBooking() {
   const handleBooked = (t: TicketData) => {
     setConfirmOpen(false);
     setSelected(null);
-    setTicket(t);
+    setTicket({
+      ...t,
+      returnPath: preselectedPatientId ? `/patients/${preselectedPatientId}` : undefined,
+    });
   };
 
   // ── Ticket screen ───────────────────────────────────────────────

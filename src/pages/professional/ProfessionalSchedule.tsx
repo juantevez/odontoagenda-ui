@@ -30,6 +30,7 @@ import { useAuthStore } from '../../store/auth.store';
 import { usePermissions } from '../../hooks/usePermissions';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS, specialtyLabel } from '../../utils/constants';
 import { formatTime } from '../../utils/formatters';
+import { apptCode, patientCode } from '../../utils/appointmentCode';
 import type { DayScheduleEntry } from '../../types/appointment.types';
 
 const DEFAULT_CLINIC_ID = 'a1000000-0000-0000-0000-000000000001';
@@ -216,11 +217,19 @@ export default function ProfessionalSchedule() {
 
               {/* Patient & procedure */}
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography fontWeight={500} noWrap>
-                  {entry.patient_name.length === 36
-                    ? `Pac. …${entry.patient_name.slice(-6)}`
-                    : entry.patient_name}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    noWrap
+                    sx={{ fontFamily: 'monospace', letterSpacing: 0.8, color: 'primary.main' }}
+                  >
+                    {apptCode(entry.appointment_id, entry.slot_start, entry.procedure_name)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {patientCode(entry.patient_name)}
+                  </Typography>
+                </Box>
                 <Typography variant="caption" color="text.secondary" noWrap>
                   {specialtyLabel(entry.procedure_name)}
                 </Typography>

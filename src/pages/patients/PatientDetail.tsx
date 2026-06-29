@@ -27,8 +27,9 @@ import AddIcon from '@mui/icons-material/Add';
 import Loading from '../../components/common/Loading';
 import { usePatient } from '../../hooks/usePatients';
 import { usePatientAppointments } from '../../hooks/useAppointments';
-import { formatDate, formatDateTime } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
+import { apptCode, procedureLabel } from '../../utils/appointmentCode';
 import { COVERAGE_TYPE_LABELS, COVERAGE_TYPES } from '../../types/patient.types';
 import type { PatientDetail as PatientDetailType, Coverage } from '../../types/patient.types';
 import { patientApi } from '../../api/patient.api';
@@ -524,14 +525,22 @@ export default function PatientDetail() {
               (apptData?.items ?? []).map((a) => (
                 <Box
                   key={a.appointment_id}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}
                 >
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>
-                      {formatDateTime(a.slot_start)}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="body2"
+                      fontWeight={700}
+                      sx={{ fontFamily: 'monospace', letterSpacing: 1, color: 'primary.main' }}
+                    >
+                      {apptCode(a.appointment_id, a.slot_start, a.procedure_code)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" component="div">
+                      {a.slot_start.slice(0, 10).split('-').reverse().join('/')}&nbsp;
+                      {a.slot_start.slice(11, 16)} hs
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {a.procedure_name} — {a.professional_name}
+                      {procedureLabel(a.procedure_code)}
                     </Typography>
                   </Box>
                   <Chip

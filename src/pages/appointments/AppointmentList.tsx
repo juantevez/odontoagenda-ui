@@ -20,6 +20,7 @@ import { useAuthStore } from '../../store/auth.store';
 import { usePermissions } from '../../hooks/usePermissions';
 import { formatDateTime } from '../../utils/formatters';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_COLORS } from '../../utils/constants';
+import { apptCode, procedureLabel } from '../../utils/appointmentCode';
 import type { Appointment } from '../../types/appointment.types';
 
 const CANCELLABLE = new Set(['scheduled', 'confirmed']);
@@ -56,13 +57,28 @@ export default function AppointmentList() {
   };
 
   const columns: Column<Appointment>[] = [
-    { key: 'patient_name', label: 'Paciente' },
-    { key: 'professional_name', label: 'Profesional' },
-    { key: 'procedure_name', label: 'Procedimiento' },
+    {
+      key: 'code',
+      label: 'Código',
+      render: (a) => (
+        <Typography
+          variant="body2"
+          fontWeight={700}
+          sx={{ fontFamily: 'monospace', letterSpacing: 1, color: 'primary.main', whiteSpace: 'nowrap' }}
+        >
+          {apptCode(a.appointment_id, a.slot_start, a.procedure_code)}
+        </Typography>
+      ),
+    },
     {
       key: 'slot_start',
       label: 'Fecha y hora',
       render: (a) => formatDateTime(a.slot_start),
+    },
+    {
+      key: 'procedure_name',
+      label: 'Procedimiento',
+      render: (a) => procedureLabel(a.procedure_code),
     },
     {
       key: 'status',

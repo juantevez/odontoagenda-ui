@@ -21,6 +21,7 @@ export interface TicketData {
   slotStart:        string;
   slotEnd:          string;
   clinicName?:      string;
+  returnPath?:      string; // ruta a la que volver al cerrar el ticket
 }
 
 interface BookingTicketProps {
@@ -30,14 +31,20 @@ interface BookingTicketProps {
 
 export default function BookingTicket({ ticket, onClose }: BookingTicketProps) {
   const navigate  = useNavigate();
-  const slotDate  = parseISO(ticket.slotStart);
+  // slice(0,16) descarta el sufijo 'Z': backend guarda naive timestamps (hora local) con 'Z'.
+  const slotDate  = parseISO(ticket.slotStart.slice(0, 16));
   const dateLabel = format(slotDate, "EEEE d 'de' MMMM yyyy", { locale: es });
   const timeStart = format(slotDate, 'HH:mm');
-  const timeEnd   = format(parseISO(ticket.slotEnd), 'HH:mm');
+  const timeEnd   = format(parseISO(ticket.slotEnd.slice(0, 16)), 'HH:mm');
 
   const handleDone = () => {
-    if (onClose) onClose();
-    else navigate('/appointments');
+    const dest = ticket.returnPath ?? '/appointments';
+    if (onClose) {
+      onClose();           // resetea el estado del padre
+      navigate(dest);      // y navega al destino correcto
+    } else {
+      navigate(dest);
+    }
   };
 
   return (
@@ -122,7 +129,7 @@ export default function BookingTicket({ ticket, onClose }: BookingTicketProps) {
               value={`odontoagenda://appointment/${ticket.appointmentId}`}
               size={120}
               level="M"
-              includeMargin
+              marginSize={4}
             />
             <Typography variant="caption" color="text.secondary">
               Escaneá al llegar
@@ -153,7 +160,7 @@ export default function BookingTicket({ ticket, onClose }: BookingTicketProps) {
         onClick={handleDone}
         sx={{ mt: 4, minWidth: 200 }}
       >
-        Ver mis turnos
+        {ticket.returnPath ? 'Ver turnos del paciente' : 'Ver mis turnos'}
       </Button>
     </Box>
   );
